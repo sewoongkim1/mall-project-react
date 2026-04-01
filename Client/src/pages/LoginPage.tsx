@@ -13,6 +13,28 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+// 소셜 로그인: 로컬은 proxy, 프로덕션은 서버 도메인 직접 사용
+const serverBase = import.meta.env.VITE_SERVER_URL ?? ''
+
+function SocialLoginButtons() {
+  return (
+    <div className="space-y-2">
+      <a href={`${serverBase}/api/auth/kakao`}
+        className="w-full flex items-center justify-center gap-3 py-2.5 px-4
+                   border border-gray-200 rounded-xl text-sm hover:bg-yellow-50 transition-colors">
+        <div className="w-5 h-5 rounded-full bg-yellow-400 flex-shrink-0" />
+        카카오로 계속하기
+      </a>
+      <a href={`${serverBase}/api/auth/google`}
+        className="w-full flex items-center justify-center gap-3 py-2.5 px-4
+                   border border-gray-200 rounded-xl text-sm hover:bg-gray-100 transition-colors">
+        <div className="w-5 h-5 rounded-full bg-red-500 flex-shrink-0" />
+        구글로 계속하기
+      </a>
+    </div>
+  )
+}
+
 export default function LoginPage() {
   const { mutate: login, isPending } = useLogin()
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -73,18 +95,7 @@ export default function LoginPage() {
           </div>
 
           {/* 소셜 버튼 */}
-          <div className="space-y-2">
-            <button className="w-full flex items-center justify-center gap-3 py-2.5 px-4
-                               border border-gray-200 rounded-xl text-sm hover:bg-gray-50 transition-colors">
-              <div className="w-5 h-5 rounded-full bg-yellow-400 flex-shrink-0" />
-              카카오로 계속하기
-            </button>
-            <button className="w-full flex items-center justify-center gap-3 py-2.5 px-4
-                               border border-gray-200 rounded-xl text-sm hover:bg-gray-50 transition-colors">
-              <div className="w-5 h-5 rounded-full bg-red-500 flex-shrink-0" />
-              구글로 계속하기
-            </button>
-          </div>
+          <SocialLoginButtons />
 
           <p className="text-center text-sm text-gray-500 mt-6">
             계정이 없으신가요?{' '}

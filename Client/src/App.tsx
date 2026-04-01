@@ -12,7 +12,8 @@ const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'))
 const CartPage          = lazy(() => import('@/pages/CartPage'))
 const LoginPage         = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage      = lazy(() => import('@/pages/RegisterPage'))
-const MyPage            = lazy(() => import('@/pages/MyPage'))
+const MyPage              = lazy(() => import('@/pages/MyPage'))
+const SocialCallbackPage  = lazy(() => import('@/pages/SocialCallbackPage'))
 
 // 로그인 필요 라우트 가드
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -45,6 +46,7 @@ export default function App() {
           {/* 인증 페이지 (GNB 없음) */}
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/social-callback" element={<SocialCallbackPage />} />
 
           {/* 쇼핑몰 메인 */}
           <Route path="/" element={

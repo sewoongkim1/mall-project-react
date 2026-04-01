@@ -2,9 +2,10 @@ import { Router } from 'express'
 import { authenticate, requireSeller, requireAdmin } from '../middleware/auth'
 
 // Controllers
-import * as auth    from '../controllers/auth.controller'
-import * as product from '../controllers/product.controller'
-import * as ai      from '../controllers/ai.controller'
+import * as auth       from '../controllers/auth.controller'
+import * as socialAuth from '../controllers/social-auth.controller'
+import * as product    from '../controllers/product.controller'
+import * as ai         from '../controllers/ai.controller'
 
 const router = Router()
 
@@ -14,6 +15,12 @@ router.post('/auth/login',              auth.login)
 router.post('/auth/logout',             auth.logout)
 router.get( '/auth/me',                 authenticate, auth.getMe)
 router.put( '/auth/preferences',        authenticate, auth.updatePreferences)
+
+// ── 소셜 로그인 ──────────────────────────────────────────
+router.get( '/auth/kakao',              socialAuth.kakaoLogin)
+router.get( '/auth/kakao/callback',     socialAuth.kakaoCallback)
+router.get( '/auth/google',             socialAuth.googleLogin)
+router.get( '/auth/google/callback',    socialAuth.googleCallback)
 
 // ── 상품 ──────────────────────────────────────────────
 router.get( '/products',                product.getProducts)
