@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/commit-message/**)",
+      "Edit(/.claude/skills/code-review/**)",
+      "Read(//c/Users/sewki/.claude/**)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\ai\\VibeCoding\\mall\\mall-project\\.claude\\skills",
+      "C:\\Users\\sewki\\.claude"
+    ]
+  }
+}
