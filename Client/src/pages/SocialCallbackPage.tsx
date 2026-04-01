@@ -20,8 +20,9 @@ export default function SocialCallbackPage() {
 
     // 토큰으로 유저 정보 조회
     authApi.getMe().then((res) => {
-      setUser(res.data.data)
-      toast.success('로그인되었습니다')
+      const user = res.data.data
+      setUser(user)
+      toast.success(`${user.nickname}님 환영합니다!`, { id: 'login-welcome', duration: 10000 })
       navigate('/', { replace: true })
     }).catch(() => {
       toast.error('유저 정보를 불러올 수 없습니다')

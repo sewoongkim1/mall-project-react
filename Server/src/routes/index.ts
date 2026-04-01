@@ -6,6 +6,7 @@ import * as auth       from '../controllers/auth.controller'
 import * as socialAuth from '../controllers/social-auth.controller'
 import * as product    from '../controllers/product.controller'
 import * as ai         from '../controllers/ai.controller'
+import * as seller     from '../controllers/seller.controller'
 
 const router = Router()
 
@@ -41,11 +42,15 @@ router.post('/ai/behavior',             ai.logBehavior)  // 비로그인도 기�
 // router.post('/wishlist/:productId',  authenticate, wishlist.toggle)
 // router.get( '/wishlist',             authenticate, wishlist.getList)
 
-// ── 셀러 (향후 구현) ──────────────────────────────────
-// router.get( '/seller/dashboard',     authenticate, requireSeller, seller.getDashboard)
-// router.get( '/seller/orders',        authenticate, requireSeller, seller.getOrders)
+// ── 셀러 ──────────────────────────────────────────────
+router.post('/seller/apply',            authenticate, seller.applySeller)
+router.get( '/seller/my-status',        authenticate, seller.getMySellerStatus)
+router.put( '/seller/my-info',          authenticate, requireSeller, seller.updateMySellerInfo)
 
-// ── 관리자 (향후 구현) ────────────────────────────────
-// router.get( '/admin/users',          authenticate, requireAdmin, admin.getUsers)
+// ── 관리자 ────────────────────────────────────────────
+router.get( '/admin/sellers',           authenticate, requireAdmin, seller.getSellerApplications)
+router.put( '/admin/sellers/:id',       authenticate, requireAdmin, seller.reviewSeller)
+router.get( '/admin/users',             authenticate, requireAdmin, seller.getUsers)
+router.put( '/admin/users/:id/role',    authenticate, requireAdmin, seller.changeUserRole)
 
 export default router

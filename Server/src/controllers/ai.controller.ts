@@ -17,6 +17,11 @@ export async function getRecommendations(
   try {
     if (!req.user) throw createError('로그인이 필요합니다', 401)
 
+    // Anthropic API 키가 없으면 빈 결과 반환
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.json({ success: true, data: [], cached: false, message: 'AI 추천 미설정 (API 키 필요)' })
+    }
+
     const userId = req.user.id
 
     // 1. 캐시 확인 (1시간)

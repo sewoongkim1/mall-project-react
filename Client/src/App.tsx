@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GNB } from '@/components/features/layout/GNB'
-import { useIsLoggedIn } from '@/store/authStore'
+import { useIsLoggedIn, useIsAdmin, useIsSeller } from '@/store/authStore'
 
 // Pages (lazy loading)
 import { lazy, Suspense } from 'react'
@@ -14,11 +14,33 @@ const LoginPage         = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage      = lazy(() => import('@/pages/RegisterPage'))
 const MyPage              = lazy(() => import('@/pages/MyPage'))
 const SocialCallbackPage  = lazy(() => import('@/pages/SocialCallbackPage'))
+const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
+const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
+const SellerSettingsPage   = lazy(() => import('@/pages/seller/SellerSettingsPage'))
+const AdminDashboardPage   = lazy(() => import('@/pages/AdminDashboardPage'))
 
 // 로그인 필요 라우트 가드
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = useIsLoggedIn()
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+// 셀러 전용 라우트 가드
+function SellerRoute({ children }: { children: React.ReactNode }) {
+  const isLoggedIn = useIsLoggedIn()
+  const isSeller = useIsSeller()
+  if (!isLoggedIn) return <Navigate to="/login" replace />
+  if (!isSeller) return <Navigate to="/" replace />
+  return <>{children}</>
+}
+
+// 관리자 전용 라우트 가드
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const isLoggedIn = useIsLoggedIn()
+  const isAdmin = useIsAdmin()
+  if (!isLoggedIn) return <Navigate to="/login" replace />
+  if (!isAdmin) return <Navigate to="/" replace />
+  return <>{children}</>
 }
 
 // 메인 레이아웃 (GNB + 컨텐츠)
@@ -66,6 +88,30 @@ export default function App() {
           <Route path="/mypage/*" element={
             <ShopLayout>
               <PrivateRoute><MyPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+
+          {/* 셀러 */}
+          <Route path="/seller/apply" element={
+            <ShopLayout>
+              <PrivateRoute><SellerApplyPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller" element={
+            <ShopLayout>
+              <SellerRoute><SellerDashboardPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/settings" element={
+            <ShopLayout>
+              <SellerRoute><SellerSettingsPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+
+          {/* 관리자 */}
+          <Route path="/admin/*" element={
+            <ShopLayout>
+              <AdminRoute><AdminDashboardPage /></AdminRoute>
             </ShopLayout>
           }/>
 

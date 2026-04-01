@@ -28,8 +28,9 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (res) => {
-      setUser(res.data.data.user)
-      toast.success('로그인되었습니다')
+      const user = res.data.data.user
+      setUser(user)
+      toast.success(`${user.nickname}님 환영합니다!`, { id: 'login-welcome', duration: 10000 })
       const params = new URLSearchParams(window.location.search)
       navigate(params.get('redirectTo') ?? '/')
     },

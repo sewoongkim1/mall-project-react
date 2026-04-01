@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, User, Search, Menu, X } from 'lucide-react'
 import { useState, useRef } from 'react'
 import { useCartStore } from '@/store/cartStore'
-import { useIsLoggedIn } from '@/store/authStore'
+import { useIsLoggedIn, useIsAdmin, useIsSeller } from '@/store/authStore'
 import { useLogout } from '@/hooks/useAuth'
 import { CATEGORY_LABELS, type ProductCategory } from '@/types'
 const CATEGORIES = Object.entries(CATEGORY_LABELS) as [ProductCategory, string][]
@@ -12,6 +12,8 @@ export function GNB() {
   const [query, setQuery]       = useState('')
   const totalCount = useCartStore((s) => s.totalCount())
   const isLoggedIn = useIsLoggedIn()
+  const isAdmin = useIsAdmin()
+  const isSeller = useIsSeller()
   const { mutate: logout } = useLogout()
   const navigate   = useNavigate()
   const inputRef   = useRef<HTMLInputElement>(null)
@@ -85,6 +87,16 @@ export function GNB() {
                   <Link to="/mypage/orders" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                     주문 내역
                   </Link>
+                  {isSeller && (
+                    <Link to="/seller" className="block px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50">
+                      셀러 관리
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link to="/admin" className="block px-4 py-2.5 text-sm text-purple-600 hover:bg-purple-50">
+                      Admin
+                    </Link>
+                  )}
                   <hr className="border-gray-100" />
                   <button onClick={() => logout()}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-b-xl">

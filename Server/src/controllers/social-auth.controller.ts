@@ -101,9 +101,10 @@ export async function kakaoCallback(req: Request, res: Response, next: NextFunct
     }
 
     // 2) Access Token → 유저 정보
-    const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    })
+    const userRes = await fetch(
+      'https://kapi.kakao.com/v2/user/me?property_keys=' + encodeURIComponent(JSON.stringify(['kakao_account.email', 'kakao_account.profile'])),
+      { headers: { Authorization: `Bearer ${tokenData.access_token}` } }
+    )
     const kakaoUser = await userRes.json() as {
       id: number
       kakao_account?: {
@@ -112,10 +113,14 @@ export async function kakaoCallback(req: Request, res: Response, next: NextFunct
       }
     }
 
+    console.log('카카오 유저 응답:', JSON.stringify(kakaoUser, null, 2))
+
     const kakaoAccount = kakaoUser.kakao_account
     const email = kakaoAccount?.email ?? `kakao_${kakaoUser.id}@styleai.local`
     const nickname = kakaoAccount?.profile?.nickname ?? `카카오유저${kakaoUser.id}`
     const profileImage = kakaoAccount?.profile?.profile_image_url
+
+    console.log('저장할 정보:', { email, nickname, profileImage })
 
     // 3) 유저 찾기/생성
     const user = await findOrCreateSocialUser('KAKAO', String(kakaoUser.id), email, nickname, profileImage)
