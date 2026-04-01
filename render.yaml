@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: styleai-server
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: Server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false  # Render 대시보드에서 직접 입력
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: CLIENT_URL
+        sync: false  # Vercel 배포 URL 입력
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: TOSSPAYMENTS_SECRET_KEY
+        sync: false
+    healthCheckPath: /health

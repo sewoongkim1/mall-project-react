@@ -16,7 +16,9 @@ const PORT = process.env.PORT ?? 5000
 // ── 보안 미들웨어 ──────────────────────────────────────
 app.use(helmet())
 app.use(cors({
-  origin:      process.env.CLIENT_URL ?? 'http://localhost:5173',
+  origin: process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(u => u.trim())
+    : 'http://localhost:5173',
   credentials: true,  // 쿠키 허용
 }))
 
@@ -40,7 +42,15 @@ app.use(cookieParser())
 
 // ── 헬스체크 ──────────────────────────────────────────
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  const dbState = require('mongoose').connection.readyState
+  const dbStatus = dbState === 1 ? 'connected' : dbState === 2 ? 'connecting' : 'disconnected'
+
+  res.status(dbState === 1 ? 200 : 503).json({
+    status: dbState === 1 ? 'ok' : 'degraded',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV ?? 'development',
+    db: dbStatus,
+  })
 })
 
 // ── API 라우트 ─────────────────────────────────────────
