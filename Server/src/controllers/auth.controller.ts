@@ -20,10 +20,13 @@ function generateTokens(userId: string, role: string) {
 }
 
 // 쿠키 옵션
-const COOKIE_OPTIONS = {
+const isProduction = process.env.NODE_ENV === 'production'
+const COOKIE_OPTIONS: {
+  httpOnly: boolean; secure: boolean; sameSite: 'none' | 'lax'; maxAge: number
+} = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
 }
 

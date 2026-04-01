@@ -47,14 +47,10 @@ export default function RegisterPage() {
     useForm<AccountForm>({ resolver: zodResolver(accountSchema) })
 
   function onAccountSubmit(data: AccountForm) {
-    register({
-      email:    data.email,
-      password: data.password,
-      nickname: data.nickname,
-    })
-    // 회원가입 성공 후 useRegister의 onSuccess에서 /onboarding 으로 이동
-    // 여기서는 step을 올려 취향 설문 먼저 보여줌
-    setStep(2)
+    register(
+      { email: data.email, password: data.password, nickname: data.nickname },
+      { onSuccess: () => setStep(2) }
+    )
   }
 
   function onPreferenceSubmit() {

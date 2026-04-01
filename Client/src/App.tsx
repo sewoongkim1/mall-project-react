@@ -12,6 +12,7 @@ const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'))
 const CartPage          = lazy(() => import('@/pages/CartPage'))
 const LoginPage         = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage      = lazy(() => import('@/pages/RegisterPage'))
+const MyPage            = lazy(() => import('@/pages/MyPage'))
 
 // 로그인 필요 라우트 가드
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -58,6 +59,11 @@ export default function App() {
           <Route path="/cart" element={
             <ShopLayout>
               <PrivateRoute><CartPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/mypage/*" element={
+            <ShopLayout>
+              <PrivateRoute><MyPage /></PrivateRoute>
             </ShopLayout>
           }/>
 

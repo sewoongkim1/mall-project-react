@@ -39,14 +39,12 @@ export function useLogin() {
 // 회원가입
 export function useRegister() {
   const setUser = useAuthStore((s) => s.setUser)
-  const navigate = useNavigate()
 
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: (res) => {
       setUser(res.data.data.user)
       toast.success('회원가입이 완료되었습니다')
-      navigate('/onboarding') // 취향 설문 페이지
     },
   })
 }
