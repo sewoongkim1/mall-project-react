@@ -53,6 +53,7 @@ router.put( '/orders/:id/confirm',     authenticate, order.confirmPayment)
 router.post('/payments/verify',        authenticate, payment.verifyAndConfirm)
 
 // ── 셀러 주문 관리 ──────────────────────────────────
+router.get( '/seller/stats',           authenticate, requireSeller, order.getSellerStats)
 router.get( '/seller/orders',          authenticate, requireSeller, order.getSellerOrders)
 router.put( '/seller/orders/:id',      authenticate, requireSeller, order.updateOrderStatus)
 

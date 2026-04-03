@@ -66,7 +66,7 @@ const OrderSchema = new Schema<IOrder>(
       phone:         { type: String, required: true },
       zipCode:       { type: String, required: true },
       address:       { type: String, required: true },
-      detailAddress: { type: String, required: true },
+      detailAddress: { type: String, default: '' },
       memo:          { type: String },
     },
     payment: {

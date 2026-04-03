@@ -24,6 +24,7 @@ const AIStylePage          = lazy(() => import('@/pages/AIStylePage'))
 const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
 const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
 const SellerSettingsPage   = lazy(() => import('@/pages/seller/SellerSettingsPage'))
+const SellerStatsPage       = lazy(() => import('@/pages/seller/SellerStatsPage'))
 const SellerProductsPage    = lazy(() => import('@/pages/seller/SellerProductsPage'))
 const SellerProductFormPage = lazy(() => import('@/pages/seller/SellerProductFormPage'))
 const AdminDashboardPage   = lazy(() => import('@/pages/AdminDashboardPage'))
@@ -144,6 +145,11 @@ export default function App() {
           <Route path="/seller/settings" element={
             <ShopLayout>
               <SellerRoute><SellerSettingsPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/stats" element={
+            <ShopLayout>
+              <SellerRoute><SellerStatsPage /></SellerRoute>
             </ShopLayout>
           }/>
           <Route path="/seller/orders" element={

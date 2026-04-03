@@ -3,7 +3,7 @@ import { ShoppingCart, Heart, User, Search, Menu, X } from 'lucide-react'
 import { useState, useRef } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { aiApi } from '@/api/ai.api'
-import { useIsLoggedIn, useIsAdmin, useIsSeller } from '@/store/authStore'
+import { useIsLoggedIn, useIsAdmin, useIsSeller, useUser } from '@/store/authStore'
 import { useLogout } from '@/hooks/useAuth'
 import { CATEGORY_LABELS, type ProductCategory } from '@/types'
 const CATEGORIES = Object.entries(CATEGORY_LABELS) as [ProductCategory, string][]
@@ -13,6 +13,7 @@ export function GNB() {
   const [query, setQuery]       = useState('')
   const totalCount = useCartStore((s) => s.totalCount())
   const isLoggedIn = useIsLoggedIn()
+  const user = useUser()
   const isAdmin = useIsAdmin()
   const isSeller = useIsSeller()
   const { mutate: logout } = useLogout()
@@ -79,8 +80,9 @@ export function GNB() {
             {/* 유저 메뉴 */}
             {isLoggedIn ? (
               <div className="relative group">
-                <button className="p-2 hover:bg-gray-100 rounded-full">
+                <button className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-full">
                   <User className="w-5 h-5 text-gray-600" />
+                  <span className="text-sm text-gray-700 font-medium hidden sm:inline">{user?.nickname}</span>
                 </button>
                 <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-100
                                 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100

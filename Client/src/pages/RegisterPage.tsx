@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -35,6 +35,7 @@ const PRICE_RANGES = [
 const STEPS = ['계정 정보', '추가 정보', 'AI 취향 설정']
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
   const [selectedSizes,  setSelectedSizes]  = useState<string[]>([])
@@ -55,12 +56,10 @@ export default function RegisterPage() {
 
   function onPreferenceSubmit() {
     const range = PRICE_RANGES[selectedPrice ?? -1]
-    updatePref({
-      styles:   selectedStyles,
-      sizes:    selectedSizes,
-      minPrice: range?.min,
-      maxPrice: range?.max,
-    })
+    updatePref(
+      { styles: selectedStyles, sizes: selectedSizes, minPrice: range?.min, maxPrice: range?.max },
+      { onSuccess: () => navigate('/') }
+    )
   }
 
   function toggle<T>(arr: T[], val: T): T[] {
@@ -205,7 +204,7 @@ export default function RegisterPage() {
                 onClick={onPreferenceSubmit}>
                 완료 — AI 추천 받기 ✨
               </Button>
-              <button onClick={() => onPreferenceSubmit()}
+              <button onClick={() => navigate('/')}
                 className="w-full text-center text-sm text-gray-400 hover:text-gray-600 mt-3">
                 건너뛰기
               </button>

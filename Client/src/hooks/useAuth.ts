@@ -37,6 +37,10 @@ export function useLogin() {
       const params = new URLSearchParams(window.location.search)
       navigate(params.get('redirectTo') ?? '/')
     },
+    onError: (err: any) => {
+      const msg = err.response?.data?.error ?? '로그인에 실패했습니다'
+      toast.error(msg, { duration: 5000 })
+    },
   })
 }
 
@@ -52,6 +56,10 @@ export function useRegister() {
       setToken(res.data.data.accessToken)
       localStorage.setItem('access_token', res.data.data.accessToken)
       toast.success('회원가입이 완료되었습니다')
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.error ?? '회원가입에 실패했습니다'
+      toast.error(msg, { duration: 5000 })
     },
   })
 }

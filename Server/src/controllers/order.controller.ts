@@ -154,6 +154,31 @@ export async function confirmPayment(req: AuthRequest, res: Response, next: Next
   }
 }
 
+// ── [셀러] 대시보드 통계 ─────────────────────────────
+export async function getSellerStats(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) throw createError('로그인이 필요합니다', 401)
+
+    const { Seller } = await import('../models/index')
+    const seller = await Seller.findOne({ user: req.user.id })
+    if (!seller) throw createError('셀러 정보가 없습니다', 404)
+
+    const productCount = await Product.countDocuments({ seller: seller._id, status: { $ne: 'DELETED' } })
+    const orders = await Order.find({ 'items.seller': seller._id, status: { $ne: 'CANCELLED' } }).lean()
+    const totalRevenue = orders.reduce((sum, o: any) => {
+      const sellerItems = o.items.filter((i: any) => String(i.seller) === String(seller._id))
+      return sum + sellerItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0)
+    }, 0)
+
+    res.json({
+      success: true,
+      data: { productCount, orderCount: orders.length, totalRevenue },
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // ── [셀러] 내 주문 조회 ─────────────────────────────
 export async function getSellerOrders(req: AuthRequest, res: Response, next: NextFunction) {
   try {

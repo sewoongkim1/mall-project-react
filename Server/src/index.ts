@@ -25,7 +25,7 @@ app.use(cors({
 // ── Rate Limiting ─────────────────────────────────────
 app.use('/api/auth', rateLimit({
   windowMs: 15 * 60 * 1000,  // 15분
-  max:      20,               // 최대 20회
+  max:      process.env.NODE_ENV === 'production' ? 20 : 200,
   message:  { success: false, error: '너무 많은 요청입니다. 잠시 후 다시 시도해주세요.' },
 }))
 

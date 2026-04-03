@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useCartStore } from '@/store/cartStore'
 import { orderApi } from '@/api/order.api'
@@ -11,6 +11,7 @@ import { ShoppingBag } from 'lucide-react'
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { items, totalPrice, clearCart } = useCartStore()
 
   const [name, setName] = useState('')
@@ -72,6 +73,8 @@ export default function CheckoutPage() {
             // 결제 성공/취소 모두 주문 완료 처리
             await orderApi.confirmPayment(order._id)
             clearCart()
+            queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+            queryClient.invalidateQueries({ queryKey: ['seller-orders'] })
             toast.success('주문이 완료되었습니다!', { duration: 5000 })
             navigate(`/order/success?orderId=${order._id}`, { replace: true })
           }
@@ -80,6 +83,8 @@ export default function CheckoutPage() {
         // Mock 결제 (포트원 미설정)
         orderApi.confirmPayment(order._id).then(() => {
           clearCart()
+          queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+          queryClient.invalidateQueries({ queryKey: ['seller-orders'] })
           toast.success('주문이 완료되었습니다!', { duration: 5000 })
           navigate(`/order/success?orderId=${order._id}`, { replace: true })
         })
