@@ -32,6 +32,7 @@ export function useLogin() {
       const { user, accessToken } = res.data.data
       setUser(user)
       setToken(accessToken)
+      localStorage.setItem('access_token', accessToken)
       toast.success(`${user.nickname}님 환영합니다!`, { id: 'login-welcome', duration: 10000 })
       const params = new URLSearchParams(window.location.search)
       navigate(params.get('redirectTo') ?? '/')
@@ -49,6 +50,7 @@ export function useRegister() {
     onSuccess: (res) => {
       setUser(res.data.data.user)
       setToken(res.data.data.accessToken)
+      localStorage.setItem('access_token', res.data.data.accessToken)
       toast.success('회원가입이 완료되었습니다')
     },
   })
@@ -64,6 +66,7 @@ export function useLogout() {
     mutationFn: authApi.logout,
     onSuccess: () => {
       logout()
+      localStorage.removeItem('access_token')
       queryClient.clear()
       navigate('/login')
       toast.success('로그아웃되었습니다')

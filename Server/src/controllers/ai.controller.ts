@@ -98,7 +98,8 @@ ${candidateProducts
       messages:   [{ role: 'user', content: prompt }],
     })
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    let text = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
     const parsed = JSON.parse(text)
 
     // 6. 상품 상세 정보 보강
@@ -186,7 +187,8 @@ ${searchQueries.slice(0, 10).join(', ') || '없음'}
       messages: [{ role: 'user', content: prompt }],
     })
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    let text = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
     const parsed = JSON.parse(text)
 
     res.json({

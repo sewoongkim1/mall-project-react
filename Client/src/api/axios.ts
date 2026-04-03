@@ -11,15 +11,18 @@ const api = axios.create({
 // 요청 인터셉터 — Authorization 헤더 추가
 api.interceptors.request.use((config) => {
   try {
+    // 1) Zustand store에서 토큰 확인
     const stored = localStorage.getItem('styleai-auth')
     if (stored) {
-      const parsed = JSON.parse(stored)
-      const token = parsed?.state?.accessToken
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
+      const token = JSON.parse(stored)?.state?.accessToken
+      if (token) { config.headers.Authorization = `Bearer ${token}`; return config }
     }
-  } catch { /* localStorage 접근 실패 무시 */ }
+    // 2) fallback: access_token 키 확인
+    const fallback = localStorage.getItem('access_token')
+    if (fallback) {
+      config.headers.Authorization = `Bearer ${fallback}`
+    }
+  } catch { /* 무시 */ }
   return config
 })
 

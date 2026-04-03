@@ -21,6 +21,7 @@ export default function SocialCallbackPage() {
 
     // 토큰 저장 후 유저 정보 조회
     setToken(token)
+    localStorage.setItem('access_token', token)
     authApi.getMe().then((res) => {
       const user = res.data.data
       setUser(user)

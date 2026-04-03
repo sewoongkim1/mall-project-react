@@ -17,6 +17,16 @@ export default function SellerDashboardPage() {
     queryFn: () => api.get('/seller/my-status').then(r => r.data.data),
     retry: false,
   })
+  const { data: productsData } = useQuery({
+    queryKey: ['seller-products-count'],
+    queryFn: () => api.get('/products?seller=me&limit=1').then(r => r.data.data),
+    enabled: !!seller,
+  })
+  const { data: ordersData } = useQuery({
+    queryKey: ['seller-orders-count'],
+    queryFn: () => api.get('/seller/orders?limit=1').then(r => r.data.data),
+    enabled: !!seller,
+  })
 
   if (isLoading) return <PageSpinner />
   if (isError) return (
@@ -43,19 +53,21 @@ export default function SellerDashboardPage() {
           </span>
         </div>
 
-        {/* 간단 통계 (추후 실제 데이터 연동) */}
+        {/* 간단 통계 */}
         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">0</p>
+            <p className="text-2xl font-bold text-gray-800">{productsData?.total ?? 0}</p>
             <p className="text-xs text-gray-400 mt-1">등록 상품</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">0</p>
-            <p className="text-xs text-gray-400 mt-1">신규 주문</p>
+            <p className="text-2xl font-bold text-gray-800">{ordersData?.total ?? 0}</p>
+            <p className="text-xs text-gray-400 mt-1">주문</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">0원</p>
-            <p className="text-xs text-gray-400 mt-1">이번 달 매출</p>
+            <p className="text-2xl font-bold text-gray-800">
+              {(ordersData?.items?.reduce((sum: number, o: any) => sum + (o.totalAmount ?? 0), 0) ?? 0).toLocaleString()}원
+            </p>
+            <p className="text-xs text-gray-400 mt-1">매출</p>
           </div>
         </div>
       </div>
