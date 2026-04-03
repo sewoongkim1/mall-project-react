@@ -10,11 +10,20 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
   try {
     const {
       category, minPrice, maxPrice, sizes,
-      sort = 'latest', q,
+      sort = 'latest', q, seller: sellerFilter,
       page = '1', limit = '20',
     } = req.query as Record<string, string>
 
-    const filter: Record<string, any> = { status: 'ACTIVE' }
+    const filter: Record<string, any> = { status: { $ne: 'DELETED' } }
+
+    // 셀러 본인 상품 필터 (seller=me)
+    if (sellerFilter === 'me' && (req as AuthRequest).user) {
+      const { Seller } = await import('../models/index')
+      const mySeller = await Seller.findOne({ user: (req as AuthRequest).user!.id })
+      if (mySeller) filter.seller = mySeller._id
+    } else {
+      filter.status = 'ACTIVE' // 일반 조회는 ACTIVE만
+    }
     if (category) filter.category = category
     if (minPrice || maxPrice) {
       filter.price = {}
@@ -94,6 +103,11 @@ const CreateProductSchema = z.object({
   price:       z.number().min(100),
   category:    z.enum(['TOP','BOTTOM','OUTER','DRESS','SHOES','BAG','ACCESSORY','HAT']),
   styleTags:   z.array(z.string()).max(5).default([]),
+  images:      z.array(z.object({
+    url:       z.string(),
+    isMain:    z.boolean().default(false),
+    sortOrder: z.number().default(0),
+  })).default([]),
   variants:    z.array(z.object({
     size:     z.string(),
     color:    z.string(),
@@ -135,6 +149,26 @@ export async function updateProduct(req: AuthRequest, res: Response, next: NextF
     if (!product) throw createError('상품을 찾을 수 없거나 권한이 없습니다', 404)
 
     res.json({ success: true, data: product })
+  } catch (err) {
+    next(err)
+  }
+}
+
+// ── 상품 삭제 (셀러, 소프트 삭제) ─────────────────────
+export async function deleteProduct(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const { Seller } = await import('../models/index')
+    const seller = await Seller.findOne({ user: req.user!.id })
+    if (!seller) throw createError('셀러 정보를 찾을 수 없습니다', 404)
+
+    const product = await Product.findOneAndUpdate(
+      { _id: req.params.id, seller: seller._id },
+      { status: 'DELETED' },
+      { new: true }
+    )
+    if (!product) throw createError('상품을 찾을 수 없거나 권한이 없습니다', 404)
+
+    res.json({ success: true })
   } catch (err) {
     next(err)
   }

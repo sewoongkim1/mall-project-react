@@ -7,6 +7,8 @@ import * as socialAuth from '../controllers/social-auth.controller'
 import * as product    from '../controllers/product.controller'
 import * as ai         from '../controllers/ai.controller'
 import * as seller     from '../controllers/seller.controller'
+import * as upload     from '../controllers/upload.controller'
+import { uploadMiddleware } from '../middleware/upload'
 
 const router = Router()
 
@@ -28,6 +30,10 @@ router.get( '/products',                product.getProducts)
 router.get( '/products/:id',            product.getProduct)
 router.post('/products',                authenticate, requireSeller, product.createProduct)
 router.put( '/products/:id',            authenticate, requireSeller, product.updateProduct)
+router.delete('/products/:id',          authenticate, requireSeller, product.deleteProduct)
+
+// ── 이미지 업로드 ────────────────────────────────────
+router.post('/upload/images',           authenticate, requireSeller, uploadMiddleware, upload.uploadImages)
 
 // ── AI 추천 ──────────────────────────────────────────
 router.get( '/ai/recommendations',      authenticate, ai.getRecommendations)

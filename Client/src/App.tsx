@@ -17,6 +17,8 @@ const SocialCallbackPage  = lazy(() => import('@/pages/SocialCallbackPage'))
 const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
 const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
 const SellerSettingsPage   = lazy(() => import('@/pages/seller/SellerSettingsPage'))
+const SellerProductsPage    = lazy(() => import('@/pages/seller/SellerProductsPage'))
+const SellerProductFormPage = lazy(() => import('@/pages/seller/SellerProductFormPage'))
 const AdminDashboardPage   = lazy(() => import('@/pages/AdminDashboardPage'))
 
 // 로그인 필요 라우트 가드
@@ -105,6 +107,21 @@ export default function App() {
           <Route path="/seller/settings" element={
             <ShopLayout>
               <SellerRoute><SellerSettingsPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/products" element={
+            <ShopLayout>
+              <SellerRoute><SellerProductsPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/products/new" element={
+            <ShopLayout>
+              <SellerRoute><SellerProductFormPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/products/:id/edit" element={
+            <ShopLayout>
+              <SellerRoute><SellerProductFormPage /></SellerRoute>
             </ShopLayout>
           }/>
 
