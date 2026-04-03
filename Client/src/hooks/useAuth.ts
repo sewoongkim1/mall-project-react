@@ -23,13 +23,15 @@ export function useMe() {
 // 로그인
 export function useLogin() {
   const setUser = useAuthStore((s) => s.setUser)
+  const setToken = useAuthStore((s) => s.setToken)
   const navigate = useNavigate()
 
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (res) => {
-      const user = res.data.data.user
+      const { user, accessToken } = res.data.data
       setUser(user)
+      setToken(accessToken)
       toast.success(`${user.nickname}님 환영합니다!`, { id: 'login-welcome', duration: 10000 })
       const params = new URLSearchParams(window.location.search)
       navigate(params.get('redirectTo') ?? '/')
@@ -40,11 +42,13 @@ export function useLogin() {
 // 회원가입
 export function useRegister() {
   const setUser = useAuthStore((s) => s.setUser)
+  const setToken = useAuthStore((s) => s.setToken)
 
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: (res) => {
       setUser(res.data.data.user)
+      setToken(res.data.data.accessToken)
       toast.success('회원가입이 완료되었습니다')
     },
   })

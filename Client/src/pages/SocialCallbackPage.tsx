@@ -9,6 +9,7 @@ export default function SocialCallbackPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const setUser = useAuthStore((s) => s.setUser)
+  const setToken = useAuthStore((s) => s.setToken)
 
   useEffect(() => {
     const token = params.get('token')
@@ -18,7 +19,8 @@ export default function SocialCallbackPage() {
       return
     }
 
-    // 토큰으로 유저 정보 조회
+    // 토큰 저장 후 유저 정보 조회
+    setToken(token)
     authApi.getMe().then((res) => {
       const user = res.data.data
       setUser(user)

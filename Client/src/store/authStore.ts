@@ -3,25 +3,29 @@ import { persist } from 'zustand/middleware'
 import type { User } from '@/types'
 
 interface AuthState {
-  user:      User | null
-  isLoading: boolean
-  setUser:   (user: User | null) => void
-  setLoading:(loading: boolean) => void
-  logout:    () => void
+  user:        User | null
+  accessToken: string | null
+  isLoading:   boolean
+  setUser:     (user: User | null) => void
+  setToken:    (token: string | null) => void
+  setLoading:  (loading: boolean) => void
+  logout:      () => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user:      null,
-      isLoading: false,
-      setUser:   (user)    => set({ user }),
-      setLoading:(loading) => set({ isLoading: loading }),
-      logout:    ()        => set({ user: null }),
+      user:        null,
+      accessToken: null,
+      isLoading:   false,
+      setUser:     (user)    => set({ user }),
+      setToken:    (token)   => set({ accessToken: token }),
+      setLoading:  (loading) => set({ isLoading: loading }),
+      logout:      ()        => set({ user: null, accessToken: null }),
     }),
     {
       name:    'styleai-auth',
-      partialize: (state) => ({ user: state.user }),  // user만 localStorage에 저장
+      partialize: (state) => ({ user: state.user, accessToken: state.accessToken }),
     }
   )
 )

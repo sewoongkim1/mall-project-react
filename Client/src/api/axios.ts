@@ -8,6 +8,15 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+// 요청 인터셉터 — Authorization 헤더 추가
+api.interceptors.request.use((config) => {
+  const token = JSON.parse(localStorage.getItem('styleai-auth') ?? '{}')?.state?.accessToken
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 // 응답 인터셉터 — 공통 에러 처리
 api.interceptors.response.use(
   (res) => res,
