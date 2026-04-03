@@ -27,10 +27,10 @@ const COOKIE_OPTIONS: {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 }
 
-// 소셜 로그인 후 프론트로 리다이렉트할 URL
-function getClientRedirectUrl(accessToken: string) {
+// 소셜 로그인 후 프론트로 리다이렉트할 URL (토큰은 쿠키로 전달)
+function getClientRedirectUrl() {
   const clientUrl = process.env.CLIENT_URL ?? 'http://localhost:5173'
-  return `${clientUrl}/auth/social-callback?token=${accessToken}`
+  return `${clientUrl}/auth/social-callback`
 }
 
 // ── 공통: 소셜 유저 찾기/생성 ────────────────────────────
@@ -129,7 +129,7 @@ export async function kakaoCallback(req: Request, res: Response, next: NextFunct
     const { accessToken, refreshToken } = generateTokens(user.id, user.role)
     res.cookie('accessToken', accessToken, COOKIE_OPTIONS)
     res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS)
-    res.redirect(getClientRedirectUrl(accessToken))
+    res.redirect(getClientRedirectUrl())
   } catch (err) {
     next(err)
   }
@@ -183,7 +183,7 @@ export async function googleCallback(req: Request, res: Response, next: NextFunc
     const { accessToken, refreshToken } = generateTokens(user.id, user.role)
     res.cookie('accessToken', accessToken, COOKIE_OPTIONS)
     res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS)
-    res.redirect(getClientRedirectUrl(accessToken))
+    res.redirect(getClientRedirectUrl())
   } catch (err) {
     next(err)
   }

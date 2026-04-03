@@ -140,7 +140,8 @@ export async function reviewSeller(req: AuthRequest, res: Response, next: NextFu
 export async function getUsers(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const { role, page = '1', limit = '20' } = req.query
-    const filter = role ? { role } : {}
+    const VALID_ROLES = ['BUYER', 'SELLER', 'ADMIN']
+    const filter = (role && VALID_ROLES.includes(String(role))) ? { role: String(role) } : {}
     const skip = (Number(page) - 1) * Number(limit)
 
     const [users, total] = await Promise.all([
@@ -171,6 +172,11 @@ export async function changeUserRole(req: AuthRequest, res: Response, next: Next
   try {
     const { id } = req.params
     const body = ChangeRoleSchema.parse(req.body)
+
+    // 자기 자신의 역할 변경 방지
+    if (String(req.user!.id) === String(id)) {
+      throw createError('자신의 역할은 변경할 수 없습니다', 403)
+    }
 
     const user = await User.findByIdAndUpdate(id, { role: body.role }, { new: true })
     if (!user) throw createError('사용자를 찾을 수 없습니다', 404)

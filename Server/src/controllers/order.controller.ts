@@ -41,11 +41,21 @@ export async function createOrder(req: AuthRequest, res: Response, next: NextFun
   try {
     if (!req.user) throw createError('로그인이 필요합니다', 401)
 
-    console.log('주문 요청 body:', JSON.stringify(req.body).substring(0, 500))
     const body = CreateOrderSchema.parse(req.body)
 
-    // 재고 차감
+    // 서버에서 실제 상품 가격 조회 (클라이언트 가격 신뢰하지 않음)
+    const productIds = [...new Set(body.items.map(i => i.productId))]
+    const products = await Product.find({ _id: { $in: productIds } }).lean()
+    const productMap = new Map(products.map(p => [String(p._id), p]))
+
+    // 가격 검증 + 재고 차감
     for (const item of body.items) {
+      const product = productMap.get(item.productId)
+      if (!product) throw createError(`상품을 찾을 수 없습니다: ${item.productName}`, 400)
+      if (product.price !== item.price) {
+        throw createError(`가격이 변경되었습니다. 새로고침 후 다시 주문해주세요.`, 400)
+      }
+
       const result = await Product.updateOne(
         { _id: item.productId, 'variants.sku': item.variantSku, 'variants.stockQty': { $gte: item.quantity } },
         { $inc: { 'variants.$.stockQty': -item.quantity } }
@@ -55,8 +65,11 @@ export async function createOrder(req: AuthRequest, res: Response, next: NextFun
       }
     }
 
-    // 금액 계산
-    const totalProductPrice = body.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    // 서버 기준 금액 계산
+    const totalProductPrice = body.items.reduce((sum, i) => {
+      const product = productMap.get(i.productId)!
+      return sum + product.price * i.quantity
+    }, 0)
     const shippingFee = totalProductPrice >= 50000 ? 0 : 3000
     const totalAmount = totalProductPrice + shippingFee
 
@@ -193,8 +206,11 @@ export async function getSellerOrders(req: AuthRequest, res: Response, next: Nex
     const limit = Number(req.query.limit ?? '20')
     const skip = (page - 1) * limit
 
+    const VALID_ORDER_STATUS = ['PENDING', 'PAYMENT_CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CONFIRMED', 'CANCELLED', 'REFUNDED']
     const filter: Record<string, any> = { 'items.seller': seller._id }
-    if (statusFilter) filter.status = statusFilter
+    if (statusFilter && VALID_ORDER_STATUS.includes(String(statusFilter))) {
+      filter.status = String(statusFilter)
+    }
 
     const [items, total] = await Promise.all([
       Order.find(filter)
