@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, User, Search, Menu, X } from 'lucide-react'
 import { useState, useRef } from 'react'
 import { useCartStore } from '@/store/cartStore'
+import { aiApi } from '@/api/ai.api'
 import { useIsLoggedIn, useIsAdmin, useIsSeller } from '@/store/authStore'
 import { useLogout } from '@/hooks/useAuth'
 import { CATEGORY_LABELS, type ProductCategory } from '@/types'
@@ -20,7 +21,10 @@ export function GNB() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (query.trim()) navigate(`/products?q=${encodeURIComponent(query.trim())}`)
+    if (query.trim()) {
+      aiApi.logBehavior({ eventType: 'SEARCH', metadata: { query: query.trim() } }).catch(() => {})
+      navigate(`/products?q=${encodeURIComponent(query.trim())}`)
+    }
   }
 
   return (

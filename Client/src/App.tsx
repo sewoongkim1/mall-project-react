@@ -16,6 +16,9 @@ const MyPage              = lazy(() => import('@/pages/MyPage'))
 const SocialCallbackPage  = lazy(() => import('@/pages/SocialCallbackPage'))
 const WishlistPage         = lazy(() => import('@/pages/WishlistPage'))
 const CheckoutPage         = lazy(() => import('@/pages/CheckoutPage'))
+const MyOrdersPage         = lazy(() => import('@/pages/MyOrdersPage'))
+const MyOrderDetailPage    = lazy(() => import('@/pages/MyOrderDetailPage'))
+const SellerOrdersPage     = lazy(() => import('@/pages/seller/SellerOrdersPage'))
 const OrderSuccessPage     = lazy(() => import('@/pages/OrderSuccessPage'))
 const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
 const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
@@ -100,6 +103,16 @@ export default function App() {
               <PrivateRoute><OrderSuccessPage /></PrivateRoute>
             </ShopLayout>
           }/>
+          <Route path="/mypage/orders" element={
+            <ShopLayout>
+              <PrivateRoute><MyOrdersPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/mypage/orders/:id" element={
+            <ShopLayout>
+              <PrivateRoute><MyOrderDetailPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
           <Route path="/mypage/wishlist" element={
             <ShopLayout>
               <PrivateRoute><WishlistPage /></PrivateRoute>
@@ -125,6 +138,11 @@ export default function App() {
           <Route path="/seller/settings" element={
             <ShopLayout>
               <SellerRoute><SellerSettingsPage /></SellerRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/seller/orders" element={
+            <ShopLayout>
+              <SellerRoute><SellerOrdersPage /></SellerRoute>
             </ShopLayout>
           }/>
           <Route path="/seller/products" element={

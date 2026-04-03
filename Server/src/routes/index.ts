@@ -11,6 +11,7 @@ import * as upload     from '../controllers/upload.controller'
 import * as wishlist   from '../controllers/wishlist.controller'
 import * as order      from '../controllers/order.controller'
 import * as payment    from '../controllers/payment.controller'
+import * as review     from '../controllers/review.controller'
 import { uploadMiddleware } from '../middleware/upload'
 
 const router = Router()
@@ -48,6 +49,14 @@ router.get( '/orders',                  authenticate, order.getMyOrders)
 router.get( '/orders/:id',             authenticate, order.getOrder)
 router.put( '/orders/:id/confirm',     authenticate, order.confirmPayment)
 router.post('/payments/verify',        authenticate, payment.verifyAndConfirm)
+
+// ── 셀러 주문 관리 ──────────────────────────────────
+router.get( '/seller/orders',          authenticate, requireSeller, order.getSellerOrders)
+router.put( '/seller/orders/:id',      authenticate, requireSeller, order.updateOrderStatus)
+
+// ── 리뷰 ─────────────────────────────────────────────
+router.post('/reviews',                 authenticate, review.createReview)
+router.get( '/reviews/:productId',      review.getProductReviews)
 
 // ── 위시리스트 ───────────────────────────────────────
 router.post('/wishlist/:productId',     authenticate, wishlist.toggle)

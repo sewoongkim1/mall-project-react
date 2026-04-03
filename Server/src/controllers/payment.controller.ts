@@ -52,7 +52,7 @@ export async function verifyAndConfirm(req: AuthRequest, res: Response, next: Ne
         amount: order.totalAmount,
         paidAt: new Date(),
       }
-      order.items.forEach((item: any) => { item.status = 'PAYMENT_CONFIRMED' })
+      order.items.forEach((item: any) => { item.status = 'CONFIRMED' })
       await order.save()
       return res.json({ success: true, data: order })
     }
@@ -73,7 +73,7 @@ export async function verifyAndConfirm(req: AuthRequest, res: Response, next: Ne
         amount: payment.amount,
         paidAt: new Date(),
       }
-      order.items.forEach((item: any) => { item.status = 'PAYMENT_CONFIRMED' })
+      order.items.forEach((item: any) => { item.status = 'CONFIRMED' })
       await order.save()
       res.json({ success: true, data: order })
     } else {

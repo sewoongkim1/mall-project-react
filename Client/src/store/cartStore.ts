@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import toast from 'react-hot-toast'
+import { aiApi } from '@/api/ai.api'
 import type { CartItem } from '@/types'
 
 interface CartState {
@@ -33,6 +34,8 @@ export const useCartStore = create<CartState>()(
           set((s) => ({ items: [...s.items, item] }))
           toast.success('장바구니에 담았습니다')
         }
+        // 행동 로그 기록
+        aiApi.logBehavior({ productId: item.productId, eventType: 'CART_ADD', metadata: { variantId: item.variantId, quantity: item.quantity } }).catch(() => {})
       },
 
       removeItem: (variantId) =>

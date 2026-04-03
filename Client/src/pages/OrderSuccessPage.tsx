@@ -29,14 +29,14 @@ export default function OrderSuccessPage() {
           <div className="space-y-2 text-sm">
             {order.items?.map((item: any, i: number) => (
               <div key={i} className="flex justify-between">
-                <span className="text-gray-600">{item.productName} ({item.variant?.size}/{item.variant?.color}) x{item.quantity}</span>
-                <span className="font-medium">{item.totalPrice?.toLocaleString()}원</span>
+                <span className="text-gray-600">{item.name} ({item.variant?.size}/{item.variant?.color}) x{item.quantity}</span>
+                <span className="font-medium">{(item.price * item.quantity).toLocaleString()}원</span>
               </div>
             ))}
             <hr className="border-gray-100" />
             <div className="flex justify-between">
               <span className="text-gray-500">배송비</span>
-              <span>{order.shippingFee === 0 ? '무료' : `${order.shippingFee?.toLocaleString()}원`}</span>
+              <span>{order.shippingAmount === 0 ? '무료' : `${order.shippingAmount?.toLocaleString()}원`}</span>
             </div>
             <div className="flex justify-between font-bold text-base">
               <span>총 결제금액</span>

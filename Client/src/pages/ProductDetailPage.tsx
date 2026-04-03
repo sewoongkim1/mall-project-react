@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import api from '@/api/axios'
 import { useProduct } from '@/hooks/useProducts'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistToggle, useWishlistCheck } from '@/hooks/useWishlist'
@@ -13,6 +15,7 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: product, isLoading } = useProduct(id!)
   const addItem = useCartStore((s) => s.addItem)
+  const navigate = useNavigate()
   const { mutate: toggleWishlist } = useWishlistToggle()
   const { data: wishlistMap } = useWishlistCheck(id ? [id] : [])
   const isWishlisted = id ? wishlistMap?.[id] ?? false : false
@@ -207,7 +210,23 @@ export default function ProductDetailPage() {
               장바구니
             </Button>
             <Button size="lg" className="flex-2"
-              disabled={!selColor || !selSize || !inStock}>
+              disabled={!selColor || !selSize || !inStock}
+              onClick={() => {
+                if (!selColor || !selSize || !product) return
+                addItem({
+                  variantId:    selVariant?.sku ?? `${product._id}-${selColor}-${selSize}`,
+                  productId:    product._id,
+                  productName:  product.name,
+                  productImage: images[0]?.url ?? '',
+                  size:         selSize,
+                  color:        selColor,
+                  price:        product.price,
+                  quantity:     qty,
+                  sellerName:   product.seller.brandName,
+                  sellerId:     product.seller._id,
+                })
+                navigate('/checkout')
+              }}>
               {inStock ? '바로 구매' : '품절'}
             </Button>
           </div>
@@ -250,8 +269,48 @@ export default function ProductDetailPage() {
       )}
 
       {activeTab === 'review' && (
-        <div className="text-center py-12 text-gray-400">
-          {product.reviewCount > 0 ? '리뷰 목록 (구현 예정)' : '아직 리뷰가 없습니다'}
+        <ReviewSection productId={product._id} />
+      )}
+    </div>
+  )
+}
+
+// ── 리뷰 섹션 ────────────────────────────────────────
+function ReviewSection({ productId }: { productId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['reviews', productId],
+    queryFn: () => api.get(`/reviews/${productId}`).then(r => r.data.data),
+  })
+
+  if (isLoading) return <div className="text-center py-8 text-gray-400">로딩 중...</div>
+
+  return (
+    <div>
+      {!data?.items?.length ? (
+        <div className="text-center py-12 text-gray-400">아직 리뷰가 없습니다</div>
+      ) : (
+        <div className="space-y-4">
+          {data.items.map((rev: any) => (
+            <div key={rev._id} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex">
+                  {[1,2,3,4,5].map(n => (
+                    <Star key={n} className={`w-3.5 h-3.5 ${n <= rev.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-400">{rev.user?.nickname}</span>
+                <span className="text-xs text-gray-300">{new Date(rev.createdAt).toLocaleDateString('ko-KR')}</span>
+              </div>
+              <p className="text-sm text-gray-700">{rev.content}</p>
+              {rev.imageUrls?.length > 0 && (
+                <div className="flex gap-2 mt-2">
+                  {rev.imageUrls.map((url: string, i: number) => (
+                    <img key={i} src={url} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

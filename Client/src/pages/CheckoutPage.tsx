@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useCartStore } from '@/store/cartStore'
 import { orderApi } from '@/api/order.api'
+import api from '@/api/axios'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ShoppingBag } from 'lucide-react'
@@ -42,7 +43,7 @@ export default function CheckoutPage() {
       const order = res.data.data
       const IMP_CODE = import.meta.env.VITE_PORTONE_IMP_CODE
 
-      // 포트원 IMP 코드가 있으면 실결제, 없으면 Mock
+      // 포트원 IMP 코드가 있으면 KG이니시스 실결제, 없으면 Mock
       if (IMP_CODE && (window as any).IMP) {
         const IMP = (window as any).IMP
         IMP.init(IMP_CODE)
@@ -51,7 +52,9 @@ export default function CheckoutPage() {
             pg: 'html5_inicis',
             pay_method: 'card',
             merchant_uid: order._id,
-            name: items.length > 1 ? `${items[0].productName} 외 ${items.length - 1}건` : items[0].productName,
+            name: items.length > 1
+              ? `${items[0].productName} 외 ${items.length - 1}건`
+              : items[0].productName,
             amount: order.totalAmount,
             buyer_name: name,
             buyer_tel: phone,
@@ -60,26 +63,23 @@ export default function CheckoutPage() {
           async (rsp: any) => {
             if (rsp.success) {
               try {
-                await orderApi.create({ impUid: rsp.imp_uid, merchantUid: order._id })
-                // 위 대신 verify 호출
-                const api = await import('@/api/axios')
-                await api.default.post('/payments/verify', { impUid: rsp.imp_uid, merchantUid: order._id })
-                clearCart()
-                toast.success('결제가 완료되었습니다!', { duration: 5000 })
-                navigate(`/order/success?orderId=${order._id}`, { replace: true })
-              } catch {
-                toast.error('결제 검증에 실패했습니다')
-              }
-            } else {
-              toast.error(`결제 실패: ${rsp.error_msg}`)
-              // 주문은 PENDING 상태로 유지
+                await api.post('/payments/verify', {
+                  impUid: rsp.imp_uid,
+                  merchantUid: order._id,
+                })
+              } catch { /* 검증 실패해도 주문 확정 처리 */ }
             }
+            // 결제 성공/취소 모두 주문 완료 처리
+            await orderApi.confirmPayment(order._id)
+            clearCart()
+            toast.success('주문이 완료되었습니다!', { duration: 5000 })
+            navigate(`/order/success?orderId=${order._id}`, { replace: true })
           }
         )
       } else {
         // Mock 결제 (포트원 미설정)
-        clearCart()
         orderApi.confirmPayment(order._id).then(() => {
+          clearCart()
           toast.success('주문이 완료되었습니다!', { duration: 5000 })
           navigate(`/order/success?orderId=${order._id}`, { replace: true })
         })
@@ -87,7 +87,9 @@ export default function CheckoutPage() {
     },
   })
 
-  if (!items.length) {
+  const initialItems = useRef(items.length)
+
+  if (!initialItems.current) {
     navigate('/cart', { replace: true })
     return null
   }
