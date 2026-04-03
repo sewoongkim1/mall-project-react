@@ -20,6 +20,7 @@ const MyOrdersPage         = lazy(() => import('@/pages/MyOrdersPage'))
 const MyOrderDetailPage    = lazy(() => import('@/pages/MyOrderDetailPage'))
 const SellerOrdersPage     = lazy(() => import('@/pages/seller/SellerOrdersPage'))
 const OrderSuccessPage     = lazy(() => import('@/pages/OrderSuccessPage'))
+const AIStylePage          = lazy(() => import('@/pages/AIStylePage'))
 const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
 const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
 const SellerSettingsPage   = lazy(() => import('@/pages/seller/SellerSettingsPage'))
@@ -101,6 +102,11 @@ export default function App() {
           <Route path="/order/success" element={
             <ShopLayout>
               <PrivateRoute><OrderSuccessPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/mypage/style" element={
+            <ShopLayout>
+              <PrivateRoute><AIStylePage /></PrivateRoute>
             </ShopLayout>
           }/>
           <Route path="/mypage/orders" element={

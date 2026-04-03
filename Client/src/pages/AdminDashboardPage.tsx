@@ -4,10 +4,10 @@ import toast from 'react-hot-toast'
 import api from '@/api/axios'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/index'
-import { Users, Store, Shield, ChevronDown } from 'lucide-react'
+import { Users, Store, Shield, ChevronDown, BarChart3, TrendingUp, ShoppingBag, Package } from 'lucide-react'
 import type { User } from '@/types'
 
-type Tab = 'sellers' | 'users'
+type Tab = 'stats' | 'sellers' | 'users'
 
 const SELLER_STATUS_MAP: Record<string, { label: string; color: string }> = {
   PENDING:   { label: '대기',  color: 'bg-yellow-100 text-yellow-700' },
@@ -23,7 +23,7 @@ const ROLE_MAP: Record<string, { label: string; color: string }> = {
 }
 
 export default function AdminDashboardPage() {
-  const [tab, setTab] = useState<Tab>('sellers')
+  const [tab, setTab] = useState<Tab>('stats')
   const [sellerFilter, setSellerFilter] = useState('')
 
   return (
@@ -35,22 +35,123 @@ export default function AdminDashboardPage() {
 
       {/* 탭 */}
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
-        <button
-          onClick={() => setTab('sellers')}
+        <button onClick={() => setTab('stats')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors
+            ${tab === 'stats' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}>
+          <BarChart3 className="w-4 h-4" /> 통계
+        </button>
+        <button onClick={() => setTab('sellers')}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors
             ${tab === 'sellers' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}>
-          <Store className="w-4 h-4" /> 셀러 관리
+          <Store className="w-4 h-4" /> 셀러
         </button>
-        <button
-          onClick={() => setTab('users')}
+        <button onClick={() => setTab('users')}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors
             ${tab === 'users' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}>
-          <Users className="w-4 h-4" /> 회원 관리
+          <Users className="w-4 h-4" /> 회원
         </button>
       </div>
 
+      {tab === 'stats' && <StatsOverview />}
       {tab === 'sellers' && <SellerManagement filter={sellerFilter} setFilter={setSellerFilter} />}
       {tab === 'users' && <UserManagement />}
+    </div>
+  )
+}
+
+// ── 통계 개요 ─────────────────────────────────────────
+function StatsOverview() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: () => api.get('/admin/stats').then(r => r.data.data),
+  })
+
+  if (isLoading) return <PageSpinner />
+
+  const s = data?.summary ?? {}
+  const cmp = data?.comparison ?? {}
+
+  function growth(current: number, previous: number) {
+    if (!previous) return current > 0 ? '+100%' : '0%'
+    const pct = Math.round(((current - previous) / previous) * 100)
+    return pct >= 0 ? `+${pct}%` : `${pct}%`
+  }
+
+  const ORDER_STATUS: Record<string, string> = {
+    PENDING: '접수', PAYMENT_CONFIRMED: '결제완료', PREPARING: '준비',
+    SHIPPED: '배송중', DELIVERED: '완료', CANCELLED: '취소',
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: '이번 달 매출', value: `${(s.thisMonthRevenue ?? 0).toLocaleString()}원`, change: growth(cmp.revenue?.current, cmp.revenue?.previous), icon: TrendingUp, color: 'text-green-600 bg-green-50' },
+          { label: '총 주문', value: `${s.totalOrders ?? 0}건`, change: growth(cmp.orders?.current, cmp.orders?.previous), icon: ShoppingBag, color: 'text-blue-600 bg-blue-50' },
+          { label: '총 회원', value: `${s.totalUsers ?? 0}명`, change: '', icon: Users, color: 'text-purple-600 bg-purple-50' },
+          { label: '등록 상품', value: `${s.totalProducts ?? 0}개`, change: '', icon: Package, color: 'text-orange-600 bg-orange-50' },
+        ].map(({ label, value, change, icon: Icon, color }) => (
+          <div key={label} className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-400">{label}</span>
+              <div className={`p-1.5 rounded-lg ${color}`}><Icon className="w-4 h-4" /></div>
+            </div>
+            <p className="text-xl font-bold">{value}</p>
+            {change && <p className={`text-xs mt-1 ${change.startsWith('+') ? 'text-green-600' : 'text-red-500'}`}>전월 대비 {change}</p>}
+          </div>
+        ))}
+      </div>
+
+      {/* 회원 구성 */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-4">
+          <h3 className="font-bold mb-3 text-sm">회원 구성</h3>
+          <div className="space-y-2">
+            {Object.entries(data?.usersByRole ?? {}).map(([role, count]) => (
+              <div key={role} className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">{ROLE_MAP[role]?.label ?? role}</span>
+                <span className="font-medium">{String(count)}명</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-100 p-4">
+          <h3 className="font-bold mb-3 text-sm">이번 달 행동 로그</h3>
+          <div className="space-y-2">
+            {Object.entries(data?.behaviorStats ?? {}).map(([type, count]) => (
+              <div key={type} className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">{type}</span>
+                <span className="font-medium">{String(count)}건</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 최근 주문 */}
+      <div className="bg-white rounded-xl border border-gray-100 p-4">
+        <h3 className="font-bold mb-3 text-sm">최근 주문</h3>
+        {data?.recentOrders?.length ? (
+          <div className="space-y-2">
+            {data.recentOrders.map((o: any) => (
+              <div key={o._id} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
+                <div>
+                  <span className="text-gray-600">{o.orderNumber}</span>
+                  <span className="text-gray-400 ml-2">{o.buyerName}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-medium">{o.totalAmount?.toLocaleString()}원</span>
+                  <span className="text-xs text-gray-400">{ORDER_STATUS[o.status] ?? o.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400">주문이 없습니다</p>
+        )}
+      </div>
     </div>
   )
 }

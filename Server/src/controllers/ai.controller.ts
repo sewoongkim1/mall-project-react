@@ -124,6 +124,88 @@ ${candidateProducts
   }
 }
 
+// ── AI 스타일 분석 ──────────────────────────────────
+export async function analyzeStyle(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) throw createError('로그인이 필요합니다', 401)
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.json({ success: true, data: null, message: 'AI 분석 미설정 (API 키 필요)' })
+    }
+
+    const userId = req.user.id
+
+    const [user, logs] = await Promise.all([
+      User.findById(userId).lean(),
+      BehaviorLog.find({ user: userId })
+        .populate('product', 'category name price styleTags')
+        .sort({ occurredAt: -1 })
+        .limit(100)
+        .lean(),
+    ])
+
+    if (!user) throw createError('사용자를 찾을 수 없습니다', 404)
+
+    // 행동 요약
+    const viewedProducts = logs.filter((l: any) => l.eventType === 'VIEW' && l.product).map((l: any) => l.product)
+    const wishlistedProducts = logs.filter((l: any) => l.eventType === 'WISHLIST' && l.product).map((l: any) => l.product)
+    const purchasedProducts = logs.filter((l: any) => l.eventType === 'PURCHASE' && l.product).map((l: any) => l.product)
+    const searchQueries = logs.filter((l: any) => l.eventType === 'SEARCH').map((l: any) => (l.metadata as any)?.query).filter(Boolean)
+
+    const prompt = `당신은 AI 패션 스타일 분석가입니다. 사용자의 쇼핑 행동 데이터를 분석해 스타일 프로필을 작성하세요.
+
+## 사용자 설정 취향
+- 선호 스타일: ${user.preferences?.styles?.join(', ') || '미설정'}
+- 선호 사이즈: ${user.preferences?.sizes?.join(', ') || '미설정'}
+
+## 최근 조회 상품 (${viewedProducts.length}건)
+${viewedProducts.slice(0, 20).map((p: any) => `- ${p.name} | ${p.category} | ${p.price}원 | ${(p.styleTags ?? []).join(',')}`).join('\n') || '없음'}
+
+## 찜한 상품 (${wishlistedProducts.length}건)
+${wishlistedProducts.slice(0, 10).map((p: any) => `- ${p.name} | ${p.category} | ${(p.styleTags ?? []).join(',')}`).join('\n') || '없음'}
+
+## 구매한 상품 (${purchasedProducts.length}건)
+${purchasedProducts.slice(0, 10).map((p: any) => `- ${p.name} | ${p.category} | ${(p.styleTags ?? []).join(',')}`).join('\n') || '없음'}
+
+## 검색 키워드
+${searchQueries.slice(0, 10).join(', ') || '없음'}
+
+반드시 아래 JSON 형식만 반환하세요:
+{
+  "styleProfile": "유저의 전체적인 스타일 성향 요약 (2-3문장)",
+  "topStyles": ["스타일키워드1", "스타일키워드2", "스타일키워드3"],
+  "preferredCategories": ["TOP", "OUTER"],
+  "priceRange": "중저가" | "중가" | "프리미엄",
+  "fashionPersona": "미니멀리스트" | "트렌드세터" | "클래식러버" | "스트릿패셔니스타" | "스포티캐주얼" | "로맨티시스트",
+  "recommendations": "AI가 제안하는 스타일 조언 (2-3문장)"
+}`
+
+    const message = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    const parsed = JSON.parse(text)
+
+    res.json({
+      success: true,
+      data: {
+        ...parsed,
+        dataStats: {
+          viewCount: viewedProducts.length,
+          wishlistCount: wishlistedProducts.length,
+          purchaseCount: purchasedProducts.length,
+          searchCount: searchQueries.length,
+        },
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // 행동 로그 기록
 export async function logBehavior(req: AuthRequest, res: Response, next: NextFunction) {
   try {

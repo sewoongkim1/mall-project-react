@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom'
 import { useMe, useLogout } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/index'
-import { User, ShoppingBag, Heart, Settings, Store, ChevronRight } from 'lucide-react'
+import { User, ShoppingBag, Heart, Settings, Store, Sparkles, ChevronRight } from 'lucide-react'
 
 const MENU_ITEMS = [
-  { to: '/mypage/orders',   icon: ShoppingBag, label: '주문 내역',   desc: '주문/배송 조회' },
-  { to: '/mypage/wishlist', icon: Heart,        label: '찜 목록',     desc: '관심 상품 모아보기' },
-  { to: '/seller/apply',    icon: Store,        label: '셀러 신청',   desc: '판매자로 등록하기' },
-  { to: '/mypage/settings', icon: Settings,     label: '계정 설정',   desc: '프로필, 비밀번호 변경' },
+  { to: '/mypage/orders',   icon: ShoppingBag, label: '주문 내역',     desc: '주문/배송 조회' },
+  { to: '/mypage/wishlist', icon: Heart,        label: '찜 목록',       desc: '관심 상품 모아보기' },
+  { to: '/mypage/style',    icon: Sparkles,     label: 'AI 스타일 분석', desc: 'AI가 분석한 나의 패션 프로필' },
+  { to: '/seller/apply',    icon: Store,        label: '셀러 신청',     desc: '판매자로 등록하기' },
+  { to: '/mypage/settings', icon: Settings,     label: '계정 설정',     desc: '프로필, 비밀번호 변경' },
 ]
 
 export default function MyPage() {

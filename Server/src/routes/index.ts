@@ -12,6 +12,7 @@ import * as wishlist   from '../controllers/wishlist.controller'
 import * as order      from '../controllers/order.controller'
 import * as payment    from '../controllers/payment.controller'
 import * as review     from '../controllers/review.controller'
+import * as stats      from '../controllers/stats.controller'
 import { uploadMiddleware } from '../middleware/upload'
 
 const router = Router()
@@ -41,6 +42,7 @@ router.post('/upload/images',           authenticate, requireSeller, uploadMiddl
 
 // ── AI 추천 ──────────────────────────────────────────
 router.get( '/ai/recommendations',      authenticate, ai.getRecommendations)
+router.get( '/ai/style-analysis',       authenticate, ai.analyzeStyle)
 router.post('/ai/behavior',             ai.logBehavior)  // 비로그인도 기록
 
 // ── 주문 ──────────────────────────────────────────────
@@ -73,5 +75,6 @@ router.get( '/admin/sellers',           authenticate, requireAdmin, seller.getSe
 router.put( '/admin/sellers/:id',       authenticate, requireAdmin, seller.reviewSeller)
 router.get( '/admin/users',             authenticate, requireAdmin, seller.getUsers)
 router.put( '/admin/users/:id/role',    authenticate, requireAdmin, seller.changeUserRole)
+router.get( '/admin/stats',            authenticate, requireAdmin, stats.getDashboardStats)
 
 export default router
