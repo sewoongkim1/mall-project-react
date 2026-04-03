@@ -93,7 +93,7 @@ export function GNB() {
                   <Link to="/mypage/orders" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                     주문 내역
                   </Link>
-                  {isSeller && (
+                  {isSeller && !isAdmin && (
                     <Link to="/seller" className="block px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50">
                       셀러 관리
                     </Link>
