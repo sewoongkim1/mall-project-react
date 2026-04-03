@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { formatPrice, cn } from '@/utils'
+import { useWishlistToggle } from '@/hooks/useWishlist'
+import { useIsLoggedIn } from '@/store/authStore'
 import type { Product } from '@/types'
 
 interface ProductCardProps {
@@ -11,6 +13,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product, recommendReason, className }: ProductCardProps) {
   const image = product.images.find((i) => i.isMain)?.url ?? product.images[0]?.url ?? ''
+  const { mutate: toggleWishlist } = useWishlistToggle()
+  const isLoggedIn = useIsLoggedIn()
 
   return (
     <div className={cn('group cursor-pointer', className)}>
@@ -32,7 +36,11 @@ export function ProductCard({ product, recommendReason, className }: ProductCard
                        opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white hover:scale-110"
             onClick={(e) => {
               e.preventDefault()
-              // TODO: 찜 토글
+              if (isLoggedIn) {
+                toggleWishlist(product._id)
+              } else {
+                window.location.href = '/login'
+              }
             }}
           >
             <Heart className="w-4 h-4 text-gray-600" />
