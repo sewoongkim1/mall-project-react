@@ -12,12 +12,19 @@ const MENU_ITEMS = [
 ]
 
 export default function SellerDashboardPage() {
-  const { data: seller, isLoading } = useQuery({
+  const { data: seller, isLoading, isError } = useQuery({
     queryKey: ['seller-status'],
     queryFn: () => api.get('/seller/my-status').then(r => r.data.data),
+    retry: false,
   })
 
   if (isLoading) return <PageSpinner />
+  if (isError) return (
+    <div className="max-w-2xl mx-auto text-center py-20">
+      <p className="text-gray-500 mb-4">셀러 정보를 불러올 수 없습니다. 다시 로그인해주세요.</p>
+      <Link to="/login" className="text-brand-600 hover:underline">로그인</Link>
+    </div>
+  )
 
   return (
     <div className="max-w-2xl mx-auto">

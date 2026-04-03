@@ -10,10 +10,16 @@ const api = axios.create({
 
 // 요청 인터셉터 — Authorization 헤더 추가
 api.interceptors.request.use((config) => {
-  const token = JSON.parse(localStorage.getItem('styleai-auth') ?? '{}')?.state?.accessToken
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+  try {
+    const stored = localStorage.getItem('styleai-auth')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      const token = parsed?.state?.accessToken
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+  } catch { /* localStorage 접근 실패 무시 */ }
   return config
 })
 
