@@ -14,9 +14,13 @@ api.interceptors.response.use(
   (err) => {
     const message = err.response?.data?.error ?? '서버 오류가 발생했습니다'
 
-    // 401: 로그인 페이지로 이동
+    // 401: 로그인 필요 (auth/me 실패는 조용히 무시)
     if (err.response?.status === 401) {
-      if (!window.location.pathname.startsWith('/login')) {
+      const url = err.config?.url ?? ''
+      if (url.includes('/auth/me')) {
+        return Promise.reject(err)
+      }
+      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
         window.location.href = `/login?redirectTo=${window.location.pathname}`
       }
       return Promise.reject(err)
