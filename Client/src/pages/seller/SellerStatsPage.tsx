@@ -14,36 +14,17 @@ export default function SellerStatsPage() {
     queryKey: ['seller-stats'],
     queryFn: () => api.get('/seller/stats').then(r => r.data.data),
   })
-
-  const { data: ordersData } = useQuery({
-    queryKey: ['seller-orders-all'],
-    queryFn: () => api.get('/seller/orders?limit=100').then(r => r.data.data),
+  const { data: recentOrders } = useQuery({
+    queryKey: ['seller-orders-recent'],
+    queryFn: () => api.get('/seller/orders?limit=10').then(r => r.data.data),
   })
 
   if (isLoading) return <PageSpinner />
 
-  const orders = ordersData?.items ?? []
-
-  // 상태별 주문 수
-  const statusCounts: Record<string, number> = {}
-  orders.forEach((o: any) => {
-    statusCounts[o.status] = (statusCounts[o.status] ?? 0) + 1
-  })
-
-  // 최근 7일 매출
-  const now = Date.now()
-  const dailyRevenue: { date: string; amount: number }[] = []
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now - i * 86400000)
-    const dateStr = `${d.getMonth() + 1}/${d.getDate()}`
-    const dayOrders = orders.filter((o: any) => {
-      const od = new Date(o.createdAt)
-      return od.toDateString() === d.toDateString() && o.status !== 'CANCELLED'
-    })
-    const amount = dayOrders.reduce((sum: number, o: any) => sum + (o.totalAmount ?? 0), 0)
-    dailyRevenue.push({ date: dateStr, amount })
-  }
+  const dailyRevenue: { date: string; amount: number }[] = stats?.dailyRevenue ?? []
+  const statusCounts: Record<string, number> = stats?.statusCounts ?? {}
   const maxRevenue = Math.max(...dailyRevenue.map(d => d.amount), 1)
+  const totalOrders = stats?.orderCount ?? 0
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -102,7 +83,7 @@ export default function SellerStatsPage() {
                 <span className="text-gray-600">{ORDER_STATUS[status] ?? status}</span>
                 <div className="flex items-center gap-2">
                   <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-500 rounded-full" style={{ width: `${(count / orders.length) * 100}%` }} />
+                    <div className="h-full bg-brand-500 rounded-full" style={{ width: `${(count / totalOrders) * 100}%` }} />
                   </div>
                   <span className="font-medium w-8 text-right">{count}건</span>
                 </div>
@@ -115,11 +96,11 @@ export default function SellerStatsPage() {
       {/* 최근 주문 목록 */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <h2 className="font-bold mb-4">최근 주문</h2>
-        {orders.length === 0 ? (
+        {totalOrders === 0 ? (
           <p className="text-sm text-gray-400">주문이 없습니다</p>
         ) : (
           <div className="space-y-2">
-            {orders.slice(0, 10).map((o: any) => (
+            {(recentOrders?.items ?? []).map((o: any) => (
               <div key={o._id} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
                 <div>
                   <span className="text-gray-600">{o.orderNumber}</span>

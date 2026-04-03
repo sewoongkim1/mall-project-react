@@ -178,14 +178,36 @@ export async function getSellerStats(req: AuthRequest, res: Response, next: Next
 
     const productCount = await Product.countDocuments({ seller: seller._id, status: { $ne: 'DELETED' } })
     const orders = await Order.find({ 'items.seller': seller._id, status: { $ne: 'CANCELLED' } }).lean()
-    const totalRevenue = orders.reduce((sum, o: any) => {
-      const sellerItems = o.items.filter((i: any) => String(i.seller) === String(seller._id))
-      return sum + sellerItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0)
-    }, 0)
+
+    // 셀러 본인 아이템만 매출 계산
+    const calcSellerRevenue = (orderList: any[]) =>
+      orderList.reduce((sum, o: any) => {
+        const sellerItems = o.items.filter((i: any) => String(i.seller) === String(seller._id))
+        return sum + sellerItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0)
+      }, 0)
+
+    const totalRevenue = calcSellerRevenue(orders)
+
+    // 최근 7일 일별 매출
+    const dailyRevenue: { date: string; amount: number; orderCount: number }[] = []
+    const now = Date.now()
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now - i * 86400000)
+      const dayOrders = orders.filter((o: any) => new Date(o.createdAt).toDateString() === d.toDateString())
+      dailyRevenue.push({
+        date: `${d.getMonth() + 1}/${d.getDate()}`,
+        amount: calcSellerRevenue(dayOrders),
+        orderCount: dayOrders.length,
+      })
+    }
+
+    // 상태별 주문 수
+    const statusCounts: Record<string, number> = {}
+    orders.forEach((o: any) => { statusCounts[o.status] = (statusCounts[o.status] ?? 0) + 1 })
 
     res.json({
       success: true,
-      data: { productCount, orderCount: orders.length, totalRevenue },
+      data: { productCount, orderCount: orders.length, totalRevenue, dailyRevenue, statusCounts },
     })
   } catch (err) {
     next(err)
