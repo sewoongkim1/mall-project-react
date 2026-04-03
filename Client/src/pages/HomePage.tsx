@@ -44,11 +44,19 @@ export default function HomePage() {
             AI가 고른 나만의 스타일
           </h1>
           <p className="text-brand-100 mb-6">취향을 분석해 딱 맞는 옷을 추천해드립니다</p>
-          <Link to={isLoggedIn ? '#ai-recommend' : '/register'}
-            className="inline-block px-6 py-3 bg-white text-brand-700 font-semibold
-                       rounded-full hover:bg-brand-50 transition-colors">
-            {isLoggedIn ? 'AI 추천 받기' : '무료로 시작하기'}
-          </Link>
+          {isLoggedIn ? (
+            <button onClick={() => document.getElementById('ai-recommend')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-block px-6 py-3 bg-white text-brand-700 font-semibold
+                         rounded-full hover:bg-brand-50 transition-colors">
+              AI 추천 받기
+            </button>
+          ) : (
+            <Link to="/register"
+              className="inline-block px-6 py-3 bg-white text-brand-700 font-semibold
+                         rounded-full hover:bg-brand-50 transition-colors">
+              무료로 시작하기
+            </Link>
+          )}
         </div>
       </section>
 
