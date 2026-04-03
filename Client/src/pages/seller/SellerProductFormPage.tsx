@@ -214,18 +214,19 @@ export default function SellerProductFormPage() {
           </div>
           <div className="space-y-3">
             {variants.map((v, i) => (
-              <div key={i} className="flex gap-2 items-start">
+              <div key={i} className="relative grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-gray-50 rounded-xl">
                 <input value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)}
-                  placeholder="사이즈" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500" />
+                  placeholder="사이즈" className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 bg-white" />
                 <input value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)}
-                  placeholder="색상" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500" />
+                  placeholder="색상" className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 bg-white" />
                 <input type="number" value={v.stockQty} onChange={e => updateVariant(i, 'stockQty', Number(e.target.value))}
-                  placeholder="재고" className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500" />
+                  placeholder="재고" className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 bg-white" />
                 <input value={v.sku} onChange={e => updateVariant(i, 'sku', e.target.value)}
-                  placeholder="SKU" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500" />
+                  placeholder="SKU" className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 bg-white" />
                 {variants.length > 1 && (
-                  <button onClick={() => removeVariant(i)} className="p-2 text-gray-400 hover:text-red-500">
-                    <X className="w-4 h-4" />
+                  <button onClick={() => removeVariant(i)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-300 shadow-sm">
+                    <X className="w-3 h-3" />
                   </button>
                 )}
               </div>

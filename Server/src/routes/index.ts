@@ -8,6 +8,9 @@ import * as product    from '../controllers/product.controller'
 import * as ai         from '../controllers/ai.controller'
 import * as seller     from '../controllers/seller.controller'
 import * as upload     from '../controllers/upload.controller'
+import * as wishlist   from '../controllers/wishlist.controller'
+import * as order      from '../controllers/order.controller'
+import * as payment    from '../controllers/payment.controller'
 import { uploadMiddleware } from '../middleware/upload'
 
 const router = Router()
@@ -39,14 +42,17 @@ router.post('/upload/images',           authenticate, requireSeller, uploadMiddl
 router.get( '/ai/recommendations',      authenticate, ai.getRecommendations)
 router.post('/ai/behavior',             ai.logBehavior)  // 비로그인도 기록
 
-// ── 주문 (향후 구현) ──────────────────────────────────
-// router.post('/orders',               authenticate, order.createOrder)
-// router.get( '/orders',               authenticate, order.getMyOrders)
-// router.get( '/orders/:id',           authenticate, order.getOrder)
+// ── 주문 ──────────────────────────────────────────────
+router.post('/orders',                  authenticate, order.createOrder)
+router.get( '/orders',                  authenticate, order.getMyOrders)
+router.get( '/orders/:id',             authenticate, order.getOrder)
+router.put( '/orders/:id/confirm',     authenticate, order.confirmPayment)
+router.post('/payments/verify',        authenticate, payment.verifyAndConfirm)
 
-// ── 위시리스트 (향후 구현) ────────────────────────────
-// router.post('/wishlist/:productId',  authenticate, wishlist.toggle)
-// router.get( '/wishlist',             authenticate, wishlist.getList)
+// ── 위시리스트 ───────────────────────────────────────
+router.post('/wishlist/:productId',     authenticate, wishlist.toggle)
+router.get( '/wishlist',                authenticate, wishlist.getList)
+router.get( '/wishlist/check',          authenticate, wishlist.checkStatus)
 
 // ── 셀러 ──────────────────────────────────────────────
 router.post('/seller/apply',            authenticate, seller.applySeller)

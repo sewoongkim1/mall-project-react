@@ -16,11 +16,20 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
 
     const filter: Record<string, any> = { status: { $ne: 'DELETED' } }
 
-    // 셀러 본인 상품 필터 (seller=me)
-    if (sellerFilter === 'me' && (req as AuthRequest).user) {
-      const { Seller } = await import('../models/index')
-      const mySeller = await Seller.findOne({ user: (req as AuthRequest).user!.id })
-      if (mySeller) filter.seller = mySeller._id
+    // 셀러 본인 상품 필터 (seller=me) — JWT에서 유저 추출 시도
+    if (sellerFilter === 'me') {
+      try {
+        const jwt = await import('jsonwebtoken')
+        const token =
+          (req as any).cookies?.accessToken ||
+          req.headers.authorization?.replace('Bearer ', '')
+        if (token) {
+          const decoded = jwt.default.verify(token, process.env.JWT_SECRET!) as { id: string }
+          const { Seller } = await import('../models/index')
+          const mySeller = await Seller.findOne({ user: decoded.id })
+          if (mySeller) filter.seller = mySeller._id
+        }
+      } catch { /* 인증 실패 시 무시 */ }
     } else {
       filter.status = 'ACTIVE' // 일반 조회는 ACTIVE만
     }

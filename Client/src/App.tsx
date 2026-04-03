@@ -14,6 +14,9 @@ const LoginPage         = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage      = lazy(() => import('@/pages/RegisterPage'))
 const MyPage              = lazy(() => import('@/pages/MyPage'))
 const SocialCallbackPage  = lazy(() => import('@/pages/SocialCallbackPage'))
+const WishlistPage         = lazy(() => import('@/pages/WishlistPage'))
+const CheckoutPage         = lazy(() => import('@/pages/CheckoutPage'))
+const OrderSuccessPage     = lazy(() => import('@/pages/OrderSuccessPage'))
 const SellerApplyPage      = lazy(() => import('@/pages/SellerApplyPage'))
 const SellerDashboardPage  = lazy(() => import('@/pages/seller/SellerDashboardPage'))
 const SellerSettingsPage   = lazy(() => import('@/pages/seller/SellerSettingsPage'))
@@ -85,6 +88,21 @@ export default function App() {
           <Route path="/cart" element={
             <ShopLayout>
               <PrivateRoute><CartPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/checkout" element={
+            <ShopLayout>
+              <PrivateRoute><CheckoutPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/order/success" element={
+            <ShopLayout>
+              <PrivateRoute><OrderSuccessPage /></PrivateRoute>
+            </ShopLayout>
+          }/>
+          <Route path="/mypage/wishlist" element={
+            <ShopLayout>
+              <PrivateRoute><WishlistPage /></PrivateRoute>
             </ShopLayout>
           }/>
           <Route path="/mypage/*" element={

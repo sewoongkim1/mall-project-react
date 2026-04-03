@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useProduct } from '@/hooks/useProducts'
 import { useCartStore } from '@/store/cartStore'
+import { useWishlistToggle, useWishlistCheck } from '@/hooks/useWishlist'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/index'
 import { formatPrice, cn } from '@/utils'
@@ -12,6 +13,9 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: product, isLoading } = useProduct(id!)
   const addItem = useCartStore((s) => s.addItem)
+  const { mutate: toggleWishlist } = useWishlistToggle()
+  const { data: wishlistMap } = useWishlistCheck(id ? [id] : [])
+  const isWishlisted = id ? wishlistMap?.[id] ?? false : false
 
   const [mainImg,  setMainImg]  = useState(0)
   const [selColor, setSelColor] = useState('')
@@ -96,8 +100,9 @@ export default function ProductDetailPage() {
               className="text-sm text-brand-600 font-medium hover:underline">
               {product.seller.brandName}
             </Link>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Heart className="w-5 h-5 text-gray-400" />
+            <button onClick={() => id && toggleWishlist(id)}
+              className="p-2 hover:bg-gray-100 rounded-full">
+              <Heart className={`w-5 h-5 ${isWishlisted ? 'text-red-500 fill-red-500' : 'text-gray-400'}`} />
             </button>
           </div>
 
